@@ -13,6 +13,7 @@ class ATopDownARPGPlayerController : public APlayerController
 
 public:
 	ATopDownARPGPlayerController();
+    void ActivateAbility(int index);
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -38,8 +39,7 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
-	void ActivateAbility1();
-	void ActivateAbility2();
+    void AddAbility(int index);
 };
 
 

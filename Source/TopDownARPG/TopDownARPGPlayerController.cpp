@@ -7,6 +7,8 @@
 #include "TopDownARPGCharacter.h"
 #include "TopDownARPG.h"
 #include "Engine/World.h"
+#include <string>
+#include <functional>
 
 ATopDownARPGPlayerController::ATopDownARPGPlayerController()
 {
@@ -33,9 +35,10 @@ void ATopDownARPGPlayerController::SetupInputComponent()
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ATopDownARPGPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ATopDownARPGPlayerController::OnSetDestinationReleased);
 
-
-	InputComponent->BindAction("Ability1", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility1);
-	InputComponent->BindAction("Ability2", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility2);
+    AddAbility(0);
+    AddAbility(1);
+    AddAbility(2);
+    AddAbility(3);
 
 	// support touch devices 
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ATopDownARPGPlayerController::MoveToTouchLocation);
@@ -44,7 +47,7 @@ void ATopDownARPGPlayerController::SetupInputComponent()
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ATopDownARPGPlayerController::OnResetVR);
 }
 
-void ATopDownARPGPlayerController::ActivateAbility1()
+void ATopDownARPGPlayerController::ActivateAbility(int index)
 {
 	ATopDownARPGCharacter* PlayerCharacter = Cast<ATopDownARPGCharacter>(GetPawn());
 	if (IsValid(PlayerCharacter) == false)
@@ -53,27 +56,22 @@ void ATopDownARPGPlayerController::ActivateAbility1()
 		return;
 	}
 
-	UAbility* Ability = PlayerCharacter->AbilityInstances[0];
+	UAbility* Ability = PlayerCharacter->AbilityInstances[index];
 	if (IsValid(Ability))
 	{
 		Ability->Activate(PlayerCharacter);
 	}
 }
 
-void ATopDownARPGPlayerController::ActivateAbility2()
+void ATopDownARPGPlayerController::AddAbility(int index)
 {
-	ATopDownARPGCharacter* PlayerCharacter = Cast<ATopDownARPGCharacter>(GetPawn());
-	if (IsValid(PlayerCharacter) == false)
-	{
-		UE_LOG(LogTopDownARPG, Error, TEXT("ATopDownARPGPlayerController::ActivateAbility1 IsValid(PlayerCharacter) == false"));
-		return;
-	}
-
-	UAbility* Ability = PlayerCharacter->AbilityInstances[1];
-	if (IsValid(Ability))
-	{
-		Ability->Activate(PlayerCharacter);
-	}
+    auto name_str = "Ability" + std::to_string(index + 1);
+    FName name{ name_str.c_str() };
+    FInputActionBinding ability(name, IE_Pressed);
+    FInputActionHandlerSignature action;
+    action.BindLambda([this, index]() {ActivateAbility(index); });
+    ability.ActionDelegate = action;
+    InputComponent->AddActionBinding(ability);
 }
 
 void ATopDownARPGPlayerController::OnResetVR()
