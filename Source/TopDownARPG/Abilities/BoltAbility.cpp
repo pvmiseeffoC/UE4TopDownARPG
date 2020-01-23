@@ -2,13 +2,16 @@
 
 
 #include "BoltAbility.h"
+#include "Engine/World.h"
 #include "Projectiles/Projectile.h"
 #include "TopDownARPG.h"
-#include "Engine/World.h"
 
-void UBoltAbility::Activate(AActor* Source)
+bool UBoltAbility::Activate(FVector AimLocation)
 {
-	Super::Activate(Source);
+	if (Super::Activate(AimLocation) == false)
+	{
+		return false;
+	}
 
 	UWorld* World = GetWorld();
 	if (IsValid(World) == false)
@@ -16,16 +19,28 @@ void UBoltAbility::Activate(AActor* Source)
 		UE_LOG(LogTopDownARPG, Error, TEXT("UBoltAbility::Activate IsValid(World) == false"));
 	}
 
+	AActor* Owner = Cast<AActor>(GetOuter());
+	if (IsValid(Owner) == false)
+	{
+		UE_LOG(LogTopDownARPG, Error, TEXT("UAbility::Activate IsValid(Owner) == false"));
+		return false;
+	}
+
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = Source;
+	SpawnParameters.Owner = Owner;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	FVector SpawnLocation = Source->GetActorLocation() + Source->GetActorForwardVector() * 100.0f;
+	FVector Direction = AimLocation - Owner->GetActorLocation();
+	Direction.Z = 0.0f;
+	Direction.Normalize();
 
-	AActor* Projectile = World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, Source->GetActorRotation(), SpawnParameters);
+	FVector SpawnLocation = Owner->GetActorLocation() + Direction * 100.0f;
+
+	AActor* Projectile = World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, Direction.Rotation(), SpawnParameters);
 	if (IsValid(Projectile) == false)
 	{
 		UE_LOG(LogTopDownARPG, Error, TEXT("UBoltAbility::Activate IsValid(Projectile) == false"));
-		return;
+		return false;
 	}
+	return true;
 }

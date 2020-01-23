@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Abilities/Ability.h"
+#include "DataTables/TopDownARPGCharacterStruct.h"
 #include "TopDownARPGCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -26,6 +27,8 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
+	FORCEINLINE float GetHealth() { return Health; }
+
 
 
 	UPROPERTY()
@@ -46,10 +49,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<UAbility>> AbilityTemplates;
 
+	UPROPERTY(EditAnywhere)
+	FDataTableRowHandle CharacterStatsRow;
+
 	UPROPERTY(EditDefaultsOnly)
 	float MaximumHealth;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float Health;
 
 	UFUNCTION()

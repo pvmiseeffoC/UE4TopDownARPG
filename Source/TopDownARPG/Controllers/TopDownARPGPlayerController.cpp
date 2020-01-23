@@ -4,9 +4,10 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
-#include "TopDownARPGCharacter.h"
-#include "TopDownARPG.h"
 #include "Engine/World.h"
+#include "Characters/TopDownARPGCharacter.h"
+#include "TopDownARPG.h"
+
 
 ATopDownARPGPlayerController::ATopDownARPGPlayerController()
 {
@@ -33,15 +34,8 @@ void ATopDownARPGPlayerController::SetupInputComponent()
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ATopDownARPGPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ATopDownARPGPlayerController::OnSetDestinationReleased);
 
-
 	InputComponent->BindAction("Ability1", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility1);
 	InputComponent->BindAction("Ability2", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility2);
-
-	// support touch devices 
-	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ATopDownARPGPlayerController::MoveToTouchLocation);
-	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ATopDownARPGPlayerController::MoveToTouchLocation);
-
-	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ATopDownARPGPlayerController::OnResetVR);
 }
 
 void ATopDownARPGPlayerController::ActivateAbility1()
@@ -56,7 +50,13 @@ void ATopDownARPGPlayerController::ActivateAbility1()
 	UAbility* Ability = PlayerCharacter->AbilityInstances[0];
 	if (IsValid(Ability))
 	{
-		Ability->Activate(PlayerCharacter);
+		FHitResult Hit;
+		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+		if (Hit.bBlockingHit)
+		{
+			Ability->Activate(Hit.ImpactPoint);
+		}
 	}
 }
 
@@ -72,38 +72,26 @@ void ATopDownARPGPlayerController::ActivateAbility2()
 	UAbility* Ability = PlayerCharacter->AbilityInstances[1];
 	if (IsValid(Ability))
 	{
-		Ability->Activate(PlayerCharacter);
-	}
-}
-
-void ATopDownARPGPlayerController::OnResetVR()
-{
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void ATopDownARPGPlayerController::MoveToMouseCursor()
-{
-	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
-	{
-		if (ATopDownARPGCharacter* MyPawn = Cast<ATopDownARPGCharacter>(GetPawn()))
-		{
-			if (MyPawn->GetCursorToWorld())
-			{
-				UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
-			}
-		}
-	}
-	else
-	{
-		// Trace to see what is under the mouse cursor
 		FHitResult Hit;
 		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
 		if (Hit.bBlockingHit)
 		{
-			// We hit something, move there
-			SetNewMoveDestination(Hit.ImpactPoint);
+			Ability->Activate(Hit.ImpactPoint);
 		}
+	}
+}
+
+void ATopDownARPGPlayerController::MoveToMouseCursor()
+{
+	// Trace to see what is under the mouse cursor
+	FHitResult Hit;
+	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+	if (Hit.bBlockingHit)
+	{
+		// We hit something, move there
+		SetNewMoveDestination(Hit.ImpactPoint);
 	}
 }
 
