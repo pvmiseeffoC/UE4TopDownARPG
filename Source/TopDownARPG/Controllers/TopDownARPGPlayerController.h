@@ -37,6 +37,9 @@ protected:
 	void OnSetDestinationReleased();
 	void ActivateAbility1();
 	void ActivateAbility2();
+
+    void ActivateInventory();
+    void PickUpItem();
 };
 
 

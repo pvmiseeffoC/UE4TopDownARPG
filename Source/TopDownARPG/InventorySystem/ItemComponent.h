@@ -7,6 +7,13 @@
 #include "Engine/Texture2D.h"
 #include "ItemComponent.generated.h"
 
+UENUM()
+enum class ItemClass {
+    Normal UMETA(DisplayName = "Normal"),
+    Rare UMETA(DisplayNAme = "Rare"),
+    Legendary UMETA(DisplayName = "Legendary"),
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TOPDOWNARPG_API UItemComponent : public UActorComponent
@@ -25,15 +32,21 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TAssetPtr<UTexture2D> Icon;
 
-    UPROPERTY(EditAnywhere)
-    FText Name;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FName Name;
 
-    UPROPERTY(EditAnywhere)
-    FText Description;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FName Description;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     int MaxStacks;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    bool Consumable;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    ItemClass Rarity;
 };

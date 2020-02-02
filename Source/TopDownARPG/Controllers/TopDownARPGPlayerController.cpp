@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "Characters/TopDownARPGCharacter.h"
 #include "TopDownARPG.h"
+#include "InventorySystem/InventoryComponent.h"
 
 
 ATopDownARPGPlayerController::ATopDownARPGPlayerController()
@@ -36,6 +37,8 @@ void ATopDownARPGPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("Ability1", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility1);
 	InputComponent->BindAction("Ability2", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateAbility2);
+    InputComponent->BindAction("ActivateInventory", IE_Pressed, this, &ATopDownARPGPlayerController::ActivateInventory);
+    InputComponent->BindAction("PickUpItem", IE_Pressed, this, &ATopDownARPGPlayerController::PickUpItem);
 }
 
 void ATopDownARPGPlayerController::ActivateAbility1()
@@ -80,6 +83,17 @@ void ATopDownARPGPlayerController::ActivateAbility2()
 			Ability->Activate(Hit.ImpactPoint);
 		}
 	}
+}
+
+void ATopDownARPGPlayerController::ActivateInventory()
+{
+    auto PlayerCharacter = Cast<ATopDownARPGCharacter>(GetPawn());
+    auto inventory = Cast<UInventoryComponent>(PlayerCharacter->GetComponentByClass(UInventoryComponent::StaticClass()));
+    inventory->Activate();
+}
+
+void ATopDownARPGPlayerController::PickUpItem()
+{
 }
 
 void ATopDownARPGPlayerController::MoveToMouseCursor()
