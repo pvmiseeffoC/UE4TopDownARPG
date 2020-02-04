@@ -42,6 +42,9 @@ public:
     FName Description;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    int Stacks;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     int MaxStacks;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)

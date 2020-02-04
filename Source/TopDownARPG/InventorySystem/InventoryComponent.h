@@ -7,16 +7,18 @@
 #include "ItemComponent.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FInventoryChangedDelegate, UInventoryComponent, OnItemChanged, int, changedIdx);
-DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FInventoryOpenChanged, UInventoryComponent, OnInventoryOpenChanged, bool, Open);
-
 UENUM()
-enum class ItemStatus
+enum InventoryStatus
 {
-    ItemAdded     UMETA(DisplayName = "ItemAdded"),
-    OutOfSpace      UMETA(DisplayName = "OutOfSpace"),
+    ItemAdded          UMETA(DisplayName = "ItemAdded"),
+    CantCarryMore      UMETA(DisplayName = "CantCarryMore"),
+    NothingToPickUp    UMETA(DisplayName = "NothingToPickUp"),
 };
 
+
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FInventoryChangedDelegate, UInventoryComponent, OnItemChanged, int, changedIdx);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FInventoryOpenChanged, UInventoryComponent, OnInventoryOpenChanged, bool, Open);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnItemAdded, UInventoryComponent, OnItemAdded, InventoryStatus, Status);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TOPDOWNARPG_API UInventoryComponent : public UActorComponent
@@ -42,7 +44,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     UFUNCTION(BlueprintCallable)
-    ItemStatus AddItem(UItemComponent* item);
+    void PickUpItem();
+
+    UFUNCTION(BlueprintCallable)
+    void AddItem(UItemComponent* item);
+
+    UFUNCTION(BlueprintCallable)
+    void DropItem(int slotIdx);
+
+    UFUNCTION(BlueprintCallable)
+    void MoveItem(int from, int to);
 
     UFUNCTION(BlueprintCallable)
     TArray<UItemComponent*> GetItems();
@@ -66,14 +77,17 @@ public:
     UPROPERTY(BlueprintAssignable)
     FInventoryOpenChanged OnInventoryOpenChanged;
 
+    UPROPERTY(BlueprintAssignable)
+    FOnItemAdded OnItemAdded;
+
     UPROPERTY(BlueprintReadOnly)
     bool IsOpen = false;
 
 private:
 
     UPROPERTY()
-	TArray<UItemComponent*> items;
+    UItemComponent* OverlappedItem;
 
     UPROPERTY()
-    TArray<int> StacksPerSlot; 
+	TArray<UItemComponent*> Items;
 };

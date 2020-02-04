@@ -94,6 +94,9 @@ void ATopDownARPGPlayerController::ActivateInventory()
 
 void ATopDownARPGPlayerController::PickUpItem()
 {
+    auto PlayerCharacter = Cast<ATopDownARPGCharacter>(GetPawn());
+    auto inventory = Cast<UInventoryComponent>(PlayerCharacter->GetComponentByClass(UInventoryComponent::StaticClass()));
+    inventory->PickUpItem();
 }
 
 void ATopDownARPGPlayerController::MoveToMouseCursor()
